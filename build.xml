@@ -1,0 +1,65 @@
+<project name="HelloWorld" basedir="." default="jar">
+
+    <property name="src"    value="src"/>
+    <property name="classes" 	value="classes"/>
+    <property name="out"     	value="out"/>
+    <property name="main-class" value="ak.HelloWorld"/>
+    <property name="lib"        value="lib"/>
+    <property name="report"        value="unit_report"/>
+
+    <path id="classpath">
+	    <fileset dir="${lib}" includes="**/*.jar"/>
+    </path>
+
+    <path id="application" location="${jar}/${ant.project.name}.jar"/>
+
+    <target name="clean">
+        <delete dir="${out}"/>
+        <delete dir="${classes}"/>
+        <delete dir="${report}"/>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="${classes}"/>
+        <javac srcdir="${src}" destdir="${classes}" classpathref="classpath"/>
+    </target>
+										    <target name="jar" depends="compile">
+        <mkdir dir="${out}"/>
+        <jar destfile="${out}/${ant.project.name}.jar" basedir="${classes}">
+            <manifest>
+                <attribute name="Main-Class" value="${main-class}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="run" depends="jar">
+        <java jar="${out}/${ant.project.name}.jar" fork="true"/>
+    </target>
+
+    <target name="clean-build" depends="clean,jar"/>
+
+    <target name="junit">
+	<mkdir dir="${report}"/>
+        <junit printsummary="yes">
+            <classpath>
+                <path refid="classpath"/>
+		<path refid="application"/>
+		<path location="${out}/${ant.project.name}.jar"/>
+            </classpath>
+
+	    <formatter type="xml"/>
+       
+	    <batchtest fork="yes" todir="${report}">
+                <fileset dir="${src}" includes="*Test.java"/>
+            </batchtest>
+        </junit>
+    </target>
+
+    <target name="junitreport">
+        <junitreport todir="${report}">
+            <fileset dir="${report}" includes="TEST-*.xml"/>
+            <report todir="${report}"/>
+        </junitreport>
+    </target>
+
+    </project>
